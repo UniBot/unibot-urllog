@@ -61,7 +61,7 @@ var plugin = function(channel, config) {
                         urls.markModified('urls');
                         urls.save();
 
-                        channel.say(url + ' - ' + client.title);
+                        channel.say(client.title);
                     });
 
                     client.on('error', function(error) {
