@@ -1,0 +1,29 @@
+{
+  "name": "unibot-urllog",
+  "version": "1.0.0",
+  "description": "URL log plugin for UniBot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UniBot/unibot-urllog.git"
+  },
+  "keywords": [
+    "unibot",
+    "irc",
+    "plugin"
+  ],
+  "author": "Tarmo Leppänen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/UniBot/unibot-urllog/issues"
+  },
+  "homepage": "https://github.com/unibot/unibot-urllog",
+  "dependencies": {
+    "mongoose": "^3.8.21",
+    "node-metainspector": "~1.0.0",
+    "moment": "~2.8.4"
+  }
+}
