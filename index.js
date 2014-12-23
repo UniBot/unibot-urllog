@@ -19,7 +19,7 @@ var Urls = new mongoose.Schema({
 var model = mongoose.model('Urls', Urls);
 
 var plugin = function(channel, config) {
-    var urls;
+    var urls = [];
 
     model.findOne({channel: channel.id}, function(error, _urls) {
         if (error || !_urls) {
