@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var metaInspector = require('node-metainspector');
 var moment = require('moment');
+var _ = require('lodash');
 
 var Urls = new mongoose.Schema({
     channel: {
@@ -19,7 +20,7 @@ var Urls = new mongoose.Schema({
 var model = mongoose.model('Urls', Urls);
 
 var plugin = function(channel, config) {
-    var urls = [];
+    var urls;
 
     model.findOne({channel: channel.id}, function(error, _urls) {
         if (error || !_urls) {
@@ -35,42 +36,38 @@ var plugin = function(channel, config) {
 
     return {
         "^((?:(?:https?|ftp)://)(?:\\S+(?::\\S*)?@)?(?:(?!(?:10|127)(?:\\.\\d{1,3}){3})(?!(?:169\\.254|192\\.168)(?:\\.\\d{1,3}){2})(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))(?::\\d{2,5})?(?:/\\S*)?)(\\s+(.*))?": function(from, matches) {
-            var url = matches[1];
+            if (!url) return; // mongoose hasn't retrieved the record yet
             var description = matches[3];
             var client = new metaInspector(url, {});
+            var found;
 
-            model.findOne({channel: channel.id, 'urls.url': url}, function(error, _url) {
-                if (error) {
+            if (found = _.findWhere(url.urls, { url: matches[1] })) {
+                var message = from + ": Old link!!1! " + found.from + " told this already " + found.timestamp.format('D.M.YYYY HH:mm:ss');
+
+                channel.say(message);
+            } else {
+                client.on('fetch', function() {
+                    var data = {
+                        url: url,
+                        description: description,
+                        title: client.title,
+                        from: from,
+                        timestamp: Date.now()
+                    };
+
+                    url.urls.push(data);
+                    url.markModified('urls');
+                    url.save();
+
+                    channel.say(client.title);
+                });
+
+                client.on('error', function(error) {
                     channel.say('Oh noes, error: ' + error, from);
-                } else if (_url) {
-                    var date = moment(_url.urls[0].timestamp);
-                    var message = from + ": Old link!!1! " + _url.urls[0].from + " told this already " + date.format('D.M.YYYY HH:mm:ss');
+                });
 
-                    channel.say(message);
-                } else {
-                    client.on('fetch', function() {
-                        var data = {
-                            url: url,
-                            description: description,
-                            title: client.title,
-                            from: from,
-                            timestamp: Date.now()
-                        };
-
-                        urls.urls.push(data);
-                        urls.markModified('urls');
-                        urls.save();
-
-                        channel.say(client.title);
-                    });
-
-                    client.on('error', function(error) {
-                        channel.say('Oh noes, error: ' + error, from);
-                    });
-
-                    client.fetch();
-                }
-            });
+                client.fetch();
+            }
         }
     };
 };
