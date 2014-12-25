@@ -22,8 +22,8 @@
   },
   "homepage": "https://github.com/unibot/unibot-urllog",
   "dependencies": {
-    "mongoose": "^3.8.21",
-    "node-metainspector": "~1.0.0",
-    "moment": "~2.8.4"
+    "node-metainspector": "1.0.0",
+    "moment": "2.8.4",
+    "lodash": "2.4.1"
   }
 }

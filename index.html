@@ -1,0 +1,27 @@
+<div class="urllog">
+    <form class="form-group" data-ng-init="filter=''">
+        <div class="input-group">
+            <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
+            <input class="form-control" data-ng-model="filter" placeholder="Filter" type="search">
+        </div>
+    </form>
+    <pagination
+        data-ng-show="$parent.urls.length"
+        data-total-items="plugin.urls.length | filter: filter"
+        data-page="currentPage"
+        data-items-per-page="200"
+        data-boundary-links="true"
+        data-rotate="false"
+        data-max-size="7"
+    ></pagination>
+    <p class="alert alert-info text-center" data-ng-hide="urls.length">Loading...</p>
+    <ul class="list-unstyled">
+        <li ng-repeat="url in (urls | filter: filter).slice((currentPage - 1) * 200, currentPage * 200)">
+            <span class="text-muted">{{log.timestamp | date : 'short'}}</span>
+            <a data-ng-href="{{url.url}}">{{url.url}}</a>
+            <span data-ng-show="url.title"> - {{url.title}}</span>
+            <span data-ng-show="url.description"> - {{url.description}}</span>
+            <span class="text-muted"> - {{url.from}}</span>
+        </li>
+    </ul>
+</div>
