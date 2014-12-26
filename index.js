@@ -55,7 +55,7 @@ module.exports = function init(options) {
     };
 
     // Merge configuration for plugin
-    if (!_.isUndefined(config.plugins.urllog) && _.isObject(config.plugins.urllog)) {
+    if (!_.isUndefined(config.plugins) && !_.isUndefined(config.plugins.urllog) && _.isObject(config.plugins.urllog)) {
         pluginConfig = _.merge(pluginConfig, config.plugins.urllog);
     }
 
@@ -124,7 +124,7 @@ module.exports = function init(options) {
                             existUrl: _url.urls[0]
                         };
 
-                        if (_url.from !== from) {
+                        if (_url.urls[0].from !== from) {
                             channel.say(_.template(pluginConfig.oldMessage, templateVars));
                         }
                     } else {
