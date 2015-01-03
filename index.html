@@ -1,4 +1,6 @@
-<div class="urllog">
+<div class="urllog"
+    data-ng-init="urls=(toArray(plugin.urls) | orderBy:'timestamp')"
+>
     <form class="form-group" data-ng-init="filter=''">
         <div class="input-group">
             <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>

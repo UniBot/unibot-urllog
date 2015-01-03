@@ -78,8 +78,8 @@ module.exports = function init(options) {
      * @param   {Function}  next    Callback function
      */
     webserver.get('/urllog/:channel', function getData(req, res, next) {
-        model.findOne({ channel: req.params.channel }, function callback(err, logs) {
-            res.send(err || logs);
+        model.findOne({ channel: req.params.channel }, function callback(error, logs) {
+            res.send(error || logs);
         });
     });
 
