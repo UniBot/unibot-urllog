@@ -1,29 +1,48 @@
-<div class="urllog"
-    data-ng-init="urls=(toArray(plugin.urls) | orderBy:'timestamp')"
->
-    <form class="form-group" data-ng-init="filter=''">
+<div class="urllog">
+    <form class="form-group"
+        data-ng-init="filter = ''; currentPage = 1"
+    >
         <div class="input-group">
-            <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
-            <input class="form-control" data-ng-model="filter" placeholder="Filter" type="search">
+            <span class="input-group-addon">
+                <i class="glyphicon glyphicon-search"></i>
+            </span>
+            <input class="form-control" data-ng-model="filter" placeholder="Filter" type="search" />
         </div>
     </form>
+
     <pagination
-        data-ng-show="$parent.urls.length"
-        data-total-items="plugin.urls.length | filter: filter"
+        data-ng-show="plugin.urls.length"
+        data-total-items="plugin.urls.length | filter : filter"
         data-page="currentPage"
-        data-items-per-page="200"
+        data-items-per-page="50"
         data-boundary-links="true"
         data-rotate="false"
         data-max-size="7"
     ></pagination>
-    <p class="alert alert-info text-center" data-ng-hide="urls.length">Loading...</p>
-    <ul class="list-unstyled">
-        <li ng-repeat="url in (urls | filter: filter).slice((currentPage - 1) * 200, currentPage * 200)">
-            <span class="text-muted">{{log.timestamp | date : 'short'}}</span>
+
+    <p class="alert alert-info text-center"
+        data-ng-hide="plugin.urls.length"
+    >
+        Loading...
+    </p>
+
+    <p class="alert alert-info text-center"
+        data-ng-show="(plugin.urls | filter: filter).length === 0"
+    >
+        No data...
+    </p>
+
+    <dl class="dl-horizontal" style="margin-bottom: 3px;"
+        data-ng-repeat="url in (plugin.urls | filter : filter | orderBy : 'timestamp' : true).slice((currentPage - 1) * 50, currentPage * 50)"
+    >
+        <dt>
+            {{url.timestamp | date : 'short'}}
+        </dt>
+        <dd>
             <a data-ng-href="{{url.url}}">{{url.url}}</a>
             <span data-ng-show="url.title"> - {{url.title}}</span>
-            <span data-ng-show="url.description"> - {{url.description}}</span>
+            <em data-ng-show="url.description"> - {{url.description}}</em>
             <span class="text-muted"> - {{url.from}}</span>
-        </li>
-    </ul>
+        </dd>
+    </dl>
 </div>
