@@ -20,7 +20,6 @@ var _ = require('lodash');
  */
 module.exports = function init(options) {
     var mongoose = options.db;
-    var bot = options.bot;
     var webserver = options.web;
     var config = options.config;
 
@@ -42,7 +41,8 @@ module.exports = function init(options) {
     var model = mongoose.model('Urls', Urls);
 
     /**
-     * Default plugin configuration. These can be override on your UniBot config.js file
+     * Default plugin configuration. These can be override on your UniBot config.js file, just add 'urllog' section to
+     * your plugin section.
      *
      * @type    {{
      *              dateFormat: string,
@@ -55,7 +55,7 @@ module.exports = function init(options) {
     };
 
     // Merge configuration for plugin
-    if (!_.isUndefined(config.plugins) && !_.isUndefined(config.plugins.urllog) && _.isObject(config.plugins.urllog)) {
+    if (_.isObject(config.plugins) && _.isObject(config.plugins.urllog)) {
         pluginConfig = _.merge(pluginConfig, config.plugins.urllog);
     }
 
@@ -66,7 +66,7 @@ module.exports = function init(options) {
      * @param   {Response}  res     Response object
      * @param   {Function}  next    Callback function
      */
-    webserver.get('/urllog', function(req, res, next) {
+    webserver.get('/urllog', function getTemplate(req, res, next) {
         res.sendFile(__dirname + '/index.html');
     });
 
@@ -77,8 +77,8 @@ module.exports = function init(options) {
      * @param   {Response}  res     Response object
      * @param   {Function}  next    Callback function
      */
-    webserver.get('/urllog/:channel', function(req, res, next) {
-        model.findOne({ channel: req.params.channel }, function(err, logs) {
+    webserver.get('/urllog/:channel', function getData(req, res, next) {
+        model.findOne({ channel: req.params.channel }, function callback(err, logs) {
             res.send(err || logs);
         });
     });
@@ -93,8 +93,8 @@ module.exports = function init(options) {
         var urls = [];
 
         // Initial of URL log store
-        model.findOne({ channel: channel.id }, function(err, _urls_) {
-            if (err || !_urls_) {
+        model.findOne({ channel: channel.id }, function callback(error, _urls_) {
+            if (error || !_urls_) {
                 urls = new model({
                     channel: channel.id
                 });
@@ -105,16 +105,18 @@ module.exports = function init(options) {
             }
         });
 
+        // Plugin regexp
         return {
-            "[.*]?((?:(?:https?|ftp)://)(?:\\S+(?::\\S*)?@)?(?:(?!(?:10|127)(?:\\.\\d{1,3}){3})(?!(?:169\\.254|192\\.168)(?:\\.\\d{1,3}){2})(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))(?::\\d{2,5})?(?:/\\S*)?)[\\s+]?(.*)?": function(from, matches) {
+            "[.*]?((?:(?:https?|ftp)://)(?:\\S+(?::\\S*)?@)?(?:(?!(?:10|127)(?:\\.\\d{1,3}){3})(?!(?:169\\.254|192\\.168)(?:\\.\\d{1,3}){2})(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))(?::\\d{2,5})?(?:/\\S*)?)[\\s+]?(.*)?": function onMatch(from, matches) {
                 var url = matches[1];
                 var description = matches[2];
-                var client = new metaInspector(url, {});
+                var client = new metaInspector(url, { limit: 50000 });
 
-                model.findOne({channel: channel.id, 'urls.url': url}, function(error, _url) {
+                // Find "same" URL from database
+                model.findOne({channel: channel.id, 'urls.url': url}, function callback(error, _url) {
                     if (error) {
                         channel.say('Oh noes, error: ' + error, from);
-                    } else if (_url) {
+                    } else if (_url) { // URL founded => notify user if he/she is not same as first person who sent URL
                         // Specify used template variables
                         var templateVars = {
                             url: url,
@@ -128,7 +130,7 @@ module.exports = function init(options) {
                             channel.say(_.template(pluginConfig.oldMessage, templateVars));
                         }
                     } else {
-                        client.on('fetch', function() {
+                        client.on('fetch', function onFetch() {
                             var data = {
                                 url: url,
                                 description: description,
@@ -147,10 +149,12 @@ module.exports = function init(options) {
                             }
                         });
 
-                        client.on('error', function(error) {
+                        // Error occurred while fetching URL contents
+                        client.on('error', function onError(error) {
                             channel.say('Oh noes, error: ' + error, from);
                         });
 
+                        // Fetch URL data
                         client.fetch();
                     }
                 });

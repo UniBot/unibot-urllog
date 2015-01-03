@@ -4,9 +4,11 @@ Simple UniBot plugin to log all URLs from configured channel.
 
 ## Install
 To your UniBot application
+
 ```npm install git://github.com/UniBot/unibot-urllog --save```
 
 And after that register new plugin on IRC channels what you need
+
 ```plugin [#channel] urllog```
 
 ps. remember to restart your UnitBot.
