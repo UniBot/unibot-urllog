@@ -6,7 +6,12 @@
             <span class="input-group-addon">
                 <i class="glyphicon glyphicon-search"></i>
             </span>
-            <input class="form-control" data-ng-model="filter" placeholder="Filter" type="search" />
+            <input class="form-control" placeholder="Filter" type="search"
+                data-ng-model="filter"
+            />
+            <span class="input-group-addon">
+                {{(plugin.urls | filter : filter).length}} / {{plugin.urls.length}}
+            </span>
         </div>
     </form>
 
@@ -27,7 +32,7 @@
     </p>
 
     <p class="alert alert-info text-center"
-        data-ng-show="(plugin.urls | filter: filter).length === 0"
+        data-ng-show="(plugin.urls | filter : filter).length === 0"
     >
         No data...
     </p>
