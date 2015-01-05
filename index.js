@@ -115,7 +115,7 @@ module.exports = function init(options) {
                 // Find "same" URL from database
                 model.findOne({channel: channel.id, 'urls.url': url}, function callback(error, _url) {
                     if (error) {
-                        channel.say('Oh noes, error: ' + error, from);
+                        channel.say(from, 'Oh noes, error: ' + error);
                     } else if (_url) { // URL founded => notify user if he/she is not same as first person who sent URL
                         // Specify used template variables
                         var templateVars = {
@@ -151,7 +151,7 @@ module.exports = function init(options) {
 
                         // Error occurred while fetching URL contents
                         client.on('error', function onError(error) {
-                            channel.say('Oh noes, error: ' + error, from);
+                            channel.say(from, 'Oh noes, error: ' + error);
                         });
 
                         // Fetch URL data
