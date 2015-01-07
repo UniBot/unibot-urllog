@@ -131,10 +131,12 @@ module.exports = function init(options) {
                         }
                     } else {
                         client.on('fetch', function onFetch() {
+                            var title = client.title.replace(/^\s+|\s+$/gm,'');
+
                             var data = {
                                 url: url,
                                 description: description,
-                                title: client.title,
+                                title: title,
                                 from: from,
                                 timestamp: Date.now()
                             };
@@ -144,8 +146,8 @@ module.exports = function init(options) {
                             urls.save();
 
                             // If URL has "real" title say that on channel
-                            if (client.title) {
-                                channel.say(client.title);
+                            if (title) {
+                                channel.say(title);
                             }
                         });
 
