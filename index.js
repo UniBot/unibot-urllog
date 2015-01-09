@@ -131,7 +131,7 @@ module.exports = function init(options) {
                         }
                     } else {
                         client.on('fetch', function onFetch() {
-                            var title = client.title.replace(/^\s+|\s+$/gm,'');
+                            var title = client.title.replace(/^\s+|\s+$/gm,'').replace(/\n|\r/g, '');
 
                             var data = {
                                 url: url,
